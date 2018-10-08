@@ -20,8 +20,6 @@ function Set-Blink1Color {
 		$BufferMax = $_.HIDInterface.Capabilities.FeatureReportByteLength
 		#[byte[]]$InputBuffer = [byte[]]::CreateInstance([byte], $BufferMax)
 
-		$Color.ToARGB()
-
 		#Convert FadeTime to Bytes
 		[byte[]]$FadeTimeBytes = [System.BitConverter]::GetBytes($FadeTime)
 		#Convert Bytes to Big Endian
