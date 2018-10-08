@@ -1,9 +1,12 @@
 function Set-Blink1Color {
     Param(
-		[Parameter()]
+		[Parameter(Mandatory)]
 		[Int]$DeviceNumber,
-        [Parameter()]
+        [Parameter(Mandatory)]
 		[System.Drawing.Color]$Color,
+		[Parameter()]
+		[ValidateRange(0, 65535)]
+		[UInt16]$FadeTime = 0,
 		[Parameter()]
 		[ValidateRange(0, 2)]
 		[int16]$Address = 0
@@ -15,28 +18,26 @@ function Set-Blink1Color {
 		}
 
 		$BufferMax = $_.HIDInterface.Capabilities.FeatureReportByteLength
-		[byte[]]$InputBuffer = [byte[]]::CreateInstance([byte], $BufferMax)
+		#[byte[]]$InputBuffer = [byte[]]::CreateInstance([byte], $BufferMax)
 
 		$Color.ToARGB()
 
-		$InputBuffer[0] = [Convert]::ToByte(1);
-		$InputBuffer[1] = [Convert]::ToByte([char]'c');
-		$InputBuffer[2] = [Convert]::ToByte($Color.R); #Red
-		$InputBuffer[3] = [Convert]::ToByte($Color.G); #Green
-		$InputBuffer[4] = [Convert]::ToByte($Color.B); #Blue
-		$InputBuffer[5] = [Convert]::ToByte(3); #TH Fadetime
-		$InputBuffer[6] = [Convert]::ToByte(2); #TL Fadetime
-		$InputBuffer[7] = [Convert]::ToByte(1); #LED Number
+		#Convert FadeTime to Bytes
+		[byte[]]$FadeTimeBytes = [System.BitConverter]::GetBytes($FadeTime)
+		#Convert Bytes to Big Endian
+		[Array]::Reverse($FadeTimeBytes)
+
+		$InputBuffer = [byte[]]@(
+			1,
+			([char]'c'),
+			$Color.R,
+			$Color.G,
+			$Color.B,
+			$FadeTimeBytes[0],
+			$FadeTimeBytes[1],
+			$Address
+		)
 
 		$_.HIDInterface.WriteFeatureData($InputBuffer)
 	}
-
-	<#
-		[ValidateRange(0, 255)]
-		[int16]$Red,
-		[ValidateRange(0, 255)]
-		[int16]$Green,
-		[ValidateRange(0, 255)]
-		[int16]$Blue,
-	#>
 }
