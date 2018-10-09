@@ -12,6 +12,10 @@ function Set-Blink1Color {
 		[int16]$Address = 0
     )
 
+	if (-not $Global:HidDevices) {
+		Initialize-Blink1Devices
+	}
+
 	$Global:HidDevices | ?{$_.Id -eq $DeviceNumber} | % {
 		if ((-not $_.HIDInterface.IsOpen) -and $_.HIDInterface.IsConnected) {
 			$_.HIDInterface.OpenDevice()
@@ -25,7 +29,7 @@ function Set-Blink1Color {
 		#Convert Bytes to Big Endian
 		[Array]::Reverse($FadeTimeBytes)
 
-		$InputBuffer = [byte[]]@(
+		[byte[]]$InputBuffer = [byte[]]@(
 			1,
 			([char]'c'),
 			$Color.R,
@@ -36,6 +40,6 @@ function Set-Blink1Color {
 			$Address
 		)
 
-		$_.HIDInterface.WriteFeatureData($InputBuffer)
+		[void]$_.HIDInterface.WriteFeatureData($InputBuffer)
 	}
 }
