@@ -3,8 +3,8 @@ function Initialize-Blink1Devices {
 
     )
 
-	List-Blink1Devices | %{
-		$_.HIDInterface.OpenDevice()
-		$_.Open = $_.HIDInterface.IsOpen
-	}
+    Get-Blink1DeviceList | % {
+        $_.HIDInterface.OpenDevice()
+        $_.Open = $_.HIDInterface.IsOpen
+    }
 }
